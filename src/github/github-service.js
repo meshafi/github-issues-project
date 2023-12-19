@@ -1,12 +1,10 @@
+const {GITHUB_USERNAME,GITHUB_REPO,GITHUB_TOKEN}=require('../../config/index');
 const axios = require('axios');
-const user = "meshafi";
-const repository = "Art-Gallery";
-const githubApiBaseUrl = `https://api.github.com/repos/${user}/${repository}`;
-const token = "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";
+const githubApiBaseUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}`;
 
 const githubHeaders = {
-  Authorization: `token ${token}`,
-  'User-Agent': 'GitHub Issues Sync',
+  Authorization: `GITHUB_TOKEN ${GITHUB_TOKEN}`,
+  'GITHUB_USERNAME-Agent': 'GitHub Issues Sync',
 };
 
 async function getGitHubIssues() {

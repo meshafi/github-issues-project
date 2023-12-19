@@ -1,49 +1,8 @@
-const express = require("express");
-const Issue = require("../models/issue-model");
-const delay = require("../utils/delay");
-
+const express = require('express');
+const syncController = require('../controllers/sync-Controller');
+const { authenticateJWT } = require('../middlewares/auth-middleware');
 const router = express.Router();
-const { getGitHubIssues } = require("../github/github-service");
-router.post("/sync", async (req, res) => {
-  try {
-    const issues = await getGitHubIssues();
 
-    for (let i = 0; i < issues.length; i += 3) {
-      const batch = issues.slice(i, i + 3);
-      await Promise.all(
-        batch.map(async (issue) => {
-          try {
-            const validatedIssue = new Issue(issue);
-            await validatedIssue.validate();
-          } catch (error) {
-            console.error(
-              `Validation error for issue ${issue.number}: ${error.message}`
-            );
-            return;
-          }
-
-          try {
-            const updatedIssue = await Issue.findOneAndUpdate(
-              { number: issue.number },
-              issue,
-              { upsert: true, new: true }
-            );
-            console.log(`Issue ${issue.number} synced successfully`);
-          } catch (error) {
-            console.error(
-              `Error updating issue ${issue.number}: ${error.message}`
-            );
-          }
-        })
-      );
-      await delay(1000);
-    }
-
-    res.json({ success: true, message: "Sync completed successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
+router.post('/sync',  authenticateJWT,syncController.syncGitHubIssues);
 
 module.exports = router;
